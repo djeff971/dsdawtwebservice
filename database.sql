@@ -57,7 +57,7 @@ CREATE TABLE `isep_awt_user` (
   `nickname` varchar(20) NOT NULL,
   `joined_date` date NOT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,6 +72,7 @@ INSERT INTO `isep_awt_user` VALUES (3,'sarah marcon','@sma','2014-06-30');
 INSERT INTO `isep_awt_user` VALUES (4,'jonh doe','@jdk','2006-03-10');
 INSERT INTO `isep_awt_user` VALUES (5,'pierre manu','@pmn','2006-05-14');
 INSERT INTO `isep_awt_user` VALUES (6,'alain','@altolabs','2004-10-12');
+INSERT INTO `isep_awt_user` VALUES (7,'Paul','@altolabs','2004-10-12');
 /*!40000 ALTER TABLE `isep_awt_user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -84,4 +85,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-23 15:34:18
+-- Dump completed on 2014-11-23 15:55:12
