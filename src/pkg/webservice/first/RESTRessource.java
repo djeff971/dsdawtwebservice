@@ -15,13 +15,17 @@ import pkg.webservice.dao.DbHelper;
 @Path("/res")
 public class RESTRessource {
 
-	 DbHelper dbhelp = new DbHelper();
+	DbHelper dbhelp = new DbHelper();
+
 	// static Logger log = Logger.getLogger(RESTRessource.class);
 
-	/*
-	 * public void updateData() { //TODO: checkout if the TB is empty
-	 * dbhelp.updateData(); }
-	 */
+
+	@GET
+	@Path("updateData")
+	public String updateData() {
+		dbhelp.updateData();
+		return "ok";
+	}
 
 	@GET
 	@Path("getUsers")
@@ -34,13 +38,14 @@ public class RESTRessource {
 	@Path("getTweets/{nickname}")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public List<Tweet> getTweets(@PathParam("nickname") String nickname) {
-		if (!nickname.startsWith("@")){
-			nickname="@"+nickname;
+		if (!nickname.startsWith("@")) {
+			nickname = "@" + nickname;
 		}
-		if(dbhelp.getUserIdFromNickname(nickname).isEmpty()){
+		if (dbhelp.getUserIdFromNickname(nickname).isEmpty()) {
 			return null;
-		}else{
-			return dbhelp.getTweets((long) dbhelp.getUserIdFromNickname(nickname).get(0).getId());
+		} else {
+			return dbhelp.getTweets((long) dbhelp
+					.getUserIdFromNickname(nickname).get(0).getId());
 		}
 
 	}

@@ -24,6 +24,7 @@ public class DbHelper {
 	List<String> result = new ArrayList<String>();
 	Connection conn = null;
 	Statement stmt = null;
+	Statement stmt2 = null;
 	ResultSet rset = null;
 	String req = null;
 
@@ -41,6 +42,7 @@ public class DbHelper {
 			conn = (Connection) DriverManager.getConnection(DBURL, DBLOGIN,
 					DBPASSWORD);
 			stmt = (Statement) conn.createStatement();
+			stmt2 = (Statement) conn.createStatement();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -89,76 +91,63 @@ public class DbHelper {
 		return listOfUsers;
 	}
 
-	/*
-	 * public int checkUserTb() { try { // register JDBC driver
-	 * Class.forName("com.mysql.jdbc.Driver"); // get a connection to the DB
-	 * conn = (Connection) DriverManager.getConnection(DBURL, DBLOGIN,
-	 * DBPASSWORD);
-	 * 
-	 * // execute query to return the nb of lines in user table stmt =
-	 * (Statement) conn.createStatement(); req =
-	 * "SELECT count(*) as nb FROM isep_awt.isep_awt_user;"; rset =
-	 * stmt.executeQuery(req); return rset.getInt("nb"); } catch (Exception e) {
-	 * e.printStackTrace(); } return -1; }
-	 * 
-	 * public int checkTweetTb() { try { // register JDBC driver
-	 * Class.forName("com.mysql.jdbc.Driver"); // get a connection to the DB
-	 * conn = (Connection) DriverManager.getConnection(DBURL, DBLOGIN,
-	 * DBPASSWORD);
-	 * 
-	 * // execute query to return the nb of lines in user table stmt =
-	 * (Statement) conn.createStatement(); req =
-	 * "SELECT count(*) as nb FROM isep_awt.isep_awt_tweet;"; rset =
-	 * stmt.executeQuery(req); return rset.getInt("nb"); } catch (Exception e) {
-	 * e.printStackTrace(); } return -1; }
-	 * 
-	 * public void insertTweetFakeData() { try { // register JDBC driver
-	 * Class.forName("com.mysql.jdbc.Driver");
-	 * 
-	 * // get a connection to the DB conn = (Connection)
-	 * DriverManager.getConnection(DBURL, DBLOGIN, DBPASSWORD);
-	 * 
-	 * 
-	 * // execute query of multi-insertion stmt = (Statement)
-	 * conn.createStatement(); req =
-	 * "INSERT INTO isep_awt.isep_awt_tweet (author_id, message, tweet_date)" +
-	 * "	VALUES (2,'this is my first tweet hehe ^^','2014-09-04 03:02:00')," +
-	 * " (3,'@dpierre bienvenue !', '2014-09-04 08:35:14');";
-	 * stmt.executeUpdate(req);
-	 * 
-	 * } catch (SQLException e) { e.printStackTrace(); } catch (Exception e) {
-	 * e.printStackTrace(); } finally { try { if (stmt != null) { conn.close();
-	 * } } catch (SQLException se) { } try { if (conn != null) { conn.close(); }
-	 * } catch (SQLException se) { se.printStackTrace(); } } }
-	 * 
-	 * public void insertUserFakeData() { try { // register JDBC driver
-	 * Class.forName("com.mysql.jdbc.Driver");
-	 * 
-	 * // get a connection to the DB conn = (Connection)
-	 * DriverManager.getConnection(DBURL, DBLOGIN, DBPASSWORD);
-	 * 
-	 * // execute query of multi-insertion stmt = (Statement)
-	 * conn.createStatement(); req =
-	 * "INSERT INTO isep_awt.isep_awt_user (name, nickname, joined_date)" +
-	 * "	VALUES ('doriane selva', '@dodo', '2010-09-04 15:10:35')," +
-	 * " ('djeffrey pierre', '@dpierre', '2014-09-04 03:01:04')," +
-	 * " ('sarah marcon', '@sma', '2014-06-30 14:36:21')," +
-	 * " ('jonh doe', '@jdk', '2006-03-10 21:04:12')," +
-	 * " ('pierre manu', '@pmn','2006-05-14 15:40:00')," +
-	 * " ('alain','@altolabs','2004-10-12 12:35:04');"; stmt.executeUpdate(req);
-	 * } catch (SQLException e) { e.printStackTrace(); } catch (Exception e) {
-	 * e.printStackTrace(); } finally { try { if (stmt != null) { conn.close();
-	 * } } catch (SQLException se) { } try { if (conn != null) { conn.close(); }
-	 * } catch (SQLException se) { se.printStackTrace(); } } }
-	 * 
-	 * public void updateData() { if (checkUserTb() == 0) {
-	 * insertUserFakeData(); } if (checkTweetTb() == 0) { insertTweetFakeData();
-	 * } }
-	 */
+	public int checkUserTb() {
+		try {
+			// execute query to return the nb of lines in user table
+			req = "SELECT count(*) as nb FROM isep_awt.isep_awt_user;";
+			rset = stmt.executeQuery(req);
+			rset.next();
+			return rset.getInt(1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public void updateData() {
+		connectionToDb();
+		int nbUsers = checkUserTb();
+		String reqUser = null;
+		String reqTweet = null;
+		if (nbUsers == 0) {
+			try {
+				reqUser = "INSERT INTO isep_awt.isep_awt_user (name, nickname, joined_date)"
+						+ "	VALUES ('doriane selva', '@dodo', '2010-09-04 15:10:35'),"
+						+ " ('djeffrey pierre', '@dpierre', '2014-09-04 03:01:04'),"
+						+ " ('sarah marcon', '@sma', '2014-06-30 14:36:21'),"
+						+ " ('jonh doe', '@jdk', '2006-03-10 21:04:12'),"
+						+ " ('pierre manu', '@pmn','2006-05-14 15:40:00'),"
+						+ " ('alain','@altolabs','2004-10-12 12:35:04');";
+				stmt.executeUpdate(reqUser);
+
+				reqTweet = "INSERT INTO isep_awt.isep_awt_tweet (author_id, message, tweet_date)"
+						+ " VALUES ((select user_id from isep_awt.isep_awt_user where nickname='@dpierre'),'this is my first tweet hehe ^^','2014-09-04 03:02:00'),"
+						+ " ((select user_id from isep_awt.isep_awt_user where nickname='@sma'),'@dpierre bienvenue !', '2014-09-04 08:35:14');";
+				stmt2.executeUpdate(reqTweet);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					if (stmt != null && stmt2 != null) {
+						conn.close();
+					}
+				} catch (SQLException se) {
+				}
+				try {
+					if (conn != null) {
+						conn.close();
+					}
+				} catch (SQLException se) {
+					se.printStackTrace();
+				}
+			}
+		}
+	}
 
 	public List<User> getUserIdFromNickname(String nickname) {
 		connectionToDb();
-		System.out.println(nickname);
 		List<User> user = new ArrayList<User>();
 
 		try {
@@ -172,11 +161,8 @@ public class DbHelper {
 				User uzr = new User();
 				uzr.setId(rset.getInt("user_id"));
 				user.add(uzr);
-				System.out.println(req);
-				System.out.println(rset.getInt("user_id"));
 			}
 		} catch (SQLException e) {
-			System.out.println("catch 2 get id from user");
 			e.printStackTrace();
 		}
 		return user;
