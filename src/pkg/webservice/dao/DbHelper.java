@@ -146,26 +146,20 @@ public class DbHelper {
 		}
 	}
 
-	public List<User> getUserIdFromNickname(String nickname) {
+	public long getUserIdFromNickname(String nickname) {
 		connectionToDb();
-		List<User> user = new ArrayList<User>();
 
 		try {
 			// execute query to retrieve id
 			req = "SELECT user_id FROM isep_awt.isep_awt_user WHERE nickname = '"
 					+ nickname + "'";
 			rset = stmt.executeQuery(req);
-
-			// extract data FROM rset
-			while (rset.next()) {
-				User uzr = new User();
-				uzr.setId(rset.getInt("user_id"));
-				user.add(uzr);
-			}
+			rset.next();
+			return rset.getLong(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return user;
+		return 0;
 	}
 
 	public List<Tweet> getTweets(long userid) {

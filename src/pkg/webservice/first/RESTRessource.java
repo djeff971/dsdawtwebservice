@@ -1,5 +1,6 @@
 package pkg.webservice.first;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -41,11 +42,14 @@ public class RESTRessource {
 		if (!nickname.startsWith("@")) {
 			nickname = "@" + nickname;
 		}
-		if (dbhelp.getUserIdFromNickname(nickname).isEmpty()) {
-			return null;
+		if (dbhelp.getUserIdFromNickname(nickname)==0) {
+			List<Tweet> retour = new ArrayList<Tweet>();
+			Tweet t = new Tweet();
+			t.setMessage("");
+			retour.add(t);
+			return retour;
 		} else {
-			return dbhelp.getTweets((long) dbhelp
-					.getUserIdFromNickname(nickname).get(0).getId());
+			return dbhelp.getTweets((long) dbhelp.getUserIdFromNickname(nickname));
 		}
 
 	}
