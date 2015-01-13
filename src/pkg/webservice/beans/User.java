@@ -2,6 +2,8 @@ package pkg.webservice.beans;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+
+
 @XmlRootElement
 public class User {
 	
@@ -10,6 +12,7 @@ public class User {
 	private String nickname;
 	private String joinedDate;
 	
+
 	public User(){
 		
 	}
