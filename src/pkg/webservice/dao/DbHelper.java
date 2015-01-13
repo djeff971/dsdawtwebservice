@@ -166,7 +166,6 @@ public class DbHelper {
 		connectionToDb();
 		// create the list of tweets to return
 		List<Tweet> listOfTweets = new ArrayList<Tweet>();
-		Tweet twt = new Tweet();
 		try {
 			req = "SELECT * FROM isep_awt.isep_awt_tweet WHERE author_id = "
 					+ userid;
@@ -174,6 +173,7 @@ public class DbHelper {
 
 			// extract data from rset
 			while (rset.next()) {
+				Tweet twt = new Tweet();
 				twt.setId(rset.getInt("tweet_id"));
 				twt.setAuthorId(rset.getInt("author_id"));
 				twt.setMessage(rset.getString("message"));
