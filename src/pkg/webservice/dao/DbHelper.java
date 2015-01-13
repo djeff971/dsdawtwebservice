@@ -8,7 +8,6 @@ import java.util.List;
 
 import pkg.webservice.beans.Tweet;
 import pkg.webservice.beans.User;
-import pkg.webservice.first.RESTRessource;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -18,9 +17,9 @@ import com.mysql.jdbc.Statement;
 @XmlRootElement
 public class DbHelper {
 
-	private static String DBURL = "jdbc:mysql://localhost/isep_awt";
-	private static String DBLOGIN = "root";
-	private static String DBPASSWORD = "root";
+	private static String DBURL = "jdbc:mysql://localhost:8889/isep_awt";
+	private static String DBLOGIN = "isep_user";
+	private static String DBPASSWORD = "isep_pwd";
 
 	List<String> result = new ArrayList<String>();
 	Connection conn = null;
@@ -28,22 +27,35 @@ public class DbHelper {
 	ResultSet rset = null;
 	String req = null;
 
+	public void connectionToDb() {
+
+		// register JDBC driver
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			// get a connection to the DB
+			conn = (Connection) DriverManager.getConnection(DBURL, DBLOGIN,
+					DBPASSWORD);
+			stmt = (Statement) conn.createStatement();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public List<User> getUsers() {
+
+		connectionToDb();
 
 		// create the list of users to return
 		List<User> listOfUsers = new ArrayList<User>();
 
 		try {
-			// register JDBC driver
-			Class.forName("com.mysql.jdbc.Driver");
-
-			// get a connection to the DB
-			conn = (Connection) DriverManager.getConnection(DBURL, DBLOGIN,
-					DBPASSWORD);
-
-			// execute query to retrieve users
-			stmt = (Statement) conn.createStatement();
-			req = "select * from isep_awt.isep_awt_user";
+			// execute query and retrieve results
+			req = "SELECT * FROM isep_awt.isep_awt_user";
 			rset = stmt.executeQuery(req);
 
 			// extract data from rset
@@ -85,7 +97,7 @@ public class DbHelper {
 	 * 
 	 * // execute query to return the nb of lines in user table stmt =
 	 * (Statement) conn.createStatement(); req =
-	 * "select count(*) as nb from isep_awt.isep_awt_user;"; rset =
+	 * "SELECT count(*) as nb FROM isep_awt.isep_awt_user;"; rset =
 	 * stmt.executeQuery(req); return rset.getInt("nb"); } catch (Exception e) {
 	 * e.printStackTrace(); } return -1; }
 	 * 
@@ -96,7 +108,7 @@ public class DbHelper {
 	 * 
 	 * // execute query to return the nb of lines in user table stmt =
 	 * (Statement) conn.createStatement(); req =
-	 * "select count(*) as nb from isep_awt.isep_awt_tweet;"; rset =
+	 * "SELECT count(*) as nb FROM isep_awt.isep_awt_tweet;"; rset =
 	 * stmt.executeQuery(req); return rset.getInt("nb"); } catch (Exception e) {
 	 * e.printStackTrace(); } return -1; }
 	 * 
@@ -144,40 +156,71 @@ public class DbHelper {
 	 * } }
 	 */
 
-	/*
-	 * public List<Tweet> getTweets(String nickname) {
-	 * 
-	 * // create the list of tweets to return List<Tweet> listOfTweets = new
-	 * ArrayList<Tweet>(); Tweet twt = new Tweet();
-	 * 
-	 * try { // register JDBC driver Class.forName("com.mysql.jdbc.Driver");
-	 * 
-	 * // get a connection to the DB log.info("connecting to db..."); conn =
-	 * (Connection) DriverManager.getConnection(DBURL, DBLOGIN, DBPASSWORD);
-	 * log.info("connected to DB !");
-	 * 
-	 * // execute query to retrieve users stmt = (Statement)
-	 * conn.createStatement(); req = "select * from isep_awt.isep_awt_tweet" +
-	 * " INNER JOIN isep_awt.isep_awt_user ON isep_awt.isep_awt_user.user_id = isep_awt.isep_awt_tweet.author_id"
-	 * + " WHERE isep_awt.isep_awt_user.nickname = '@" + nickname + "'"; rset =
-	 * stmt.executeQuery(req); log.info("data retrieved");
-	 * 
-	 * //extract data from rset while(rset.next()){
-	 * twt.setId(rset.getInt("tweet_id"));
-	 * twt.setAuthorId(rset.getInt("author_id"));
-	 * twt.setMessage(rset.getString("message"));
-	 * twt.setTweetDate(rset.getString("tweet_date")); listOfTweets.add(twt);
-	 * log.info("tweet added to list"); } } catch (SQLException e) {
-	 * log.error("SQL error"); e.printStackTrace(); } catch (Exception e) {
-	 * log.error("impossible to register JDBC driver"); e.printStackTrace(); }
-	 * finally { try { if (stmt != null) { conn.close();
-	 * log.info("connection closed !"); } } catch (SQLException se) {
-	 * log.error("impossible to close SQL connection"); } try { if (conn !=
-	 * null) { conn.close(); log.info("connection closed !"); } } catch
-	 * (SQLException se) { log.error("impossible to close SQL connection");
-	 * se.printStackTrace(); } }
-	 * 
-	 * return listOfTweets; }
-	 */
+	public List<User> getUserIdFromNickname(String nickname) {
+		connectionToDb();
+		System.out.println(nickname);
+		List<User> user = new ArrayList<User>();
 
+		try {
+			// execute query to retrieve id
+			req = "SELECT user_id FROM isep_awt.isep_awt_user WHERE nickname = '"
+					+ nickname + "'";
+			rset = stmt.executeQuery(req);
+
+			// extract data FROM rset
+			while (rset.next()) {
+				User uzr = new User();
+				uzr.setId(rset.getInt("user_id"));
+				user.add(uzr);
+				System.out.println(req);
+				System.out.println(rset.getInt("user_id"));
+			}
+		} catch (SQLException e) {
+			System.out.println("catch 2 get id from user");
+			e.printStackTrace();
+		}
+		return user;
+	}
+
+	public List<Tweet> getTweets(long userid) {
+		connectionToDb();
+		// create the list of tweets to return
+		List<Tweet> listOfTweets = new ArrayList<Tweet>();
+		Tweet twt = new Tweet();
+		try {
+			req = "SELECT * FROM isep_awt.isep_awt_tweet WHERE author_id = "
+					+ userid;
+			rset = stmt.executeQuery(req);
+
+			// extract data from rset
+			while (rset.next()) {
+				twt.setId(rset.getInt("tweet_id"));
+				twt.setAuthorId(rset.getInt("author_id"));
+				twt.setMessage(rset.getString("message"));
+				twt.setTweetDate(rset.getString("tweet_date"));
+				listOfTweets.add(twt);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (stmt != null) {
+					conn.close();
+				}
+			} catch (SQLException se) {
+				se.printStackTrace();
+			}
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException se) {
+				se.printStackTrace();
+			}
+		}
+
+		return listOfTweets;
+	}
 }
