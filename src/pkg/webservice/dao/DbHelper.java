@@ -11,11 +11,15 @@ import pkg.webservice.beans.User;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.log4j.Logger;
+
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
 @XmlRootElement
 public class DbHelper {
+
+	static Logger log = Logger.getLogger(DbHelper.class);
 
 	private static String DBURL = "jdbc:mysql://localhost:8889/isep_awt";
 	private static String DBLOGIN = "isep_user";
@@ -29,11 +33,12 @@ public class DbHelper {
 	String req = null;
 
 	public void connectionToDb() {
-
+		log.info("trying to connect to DB");
 		// register JDBC driver
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
+			log.error("unable to find driver for mysql");
 			e.printStackTrace();
 		}
 
@@ -44,8 +49,10 @@ public class DbHelper {
 			stmt = (Statement) conn.createStatement();
 			stmt2 = (Statement) conn.createStatement();
 		} catch (SQLException e) {
+			log.error("unable to connect to DB. Please check your port in DBURL and if WAMP is running.");
 			e.printStackTrace();
 		}
+		log.info("[SUCCESS] connected to DB !");
 	}
 
 	public List<User> getUsers() {
@@ -69,6 +76,7 @@ public class DbHelper {
 				uzr.setJoinedDate(rset.getString("joined_date"));
 				listOfUsers.add(uzr);
 			}
+			log.trace(listOfUsers.size() + " users retrieved");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -97,6 +105,7 @@ public class DbHelper {
 			req = "SELECT count(*) as nb FROM isep_awt.isep_awt_user;";
 			rset = stmt.executeQuery(req);
 			rset.next();
+			log.trace(rset.getInt(1) + " users in the DB");
 			return rset.getInt(1);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -124,6 +133,8 @@ public class DbHelper {
 						+ " VALUES ((select user_id from isep_awt.isep_awt_user where nickname='@dpierre'),'this is my first tweet hehe ^^','2014-09-04 03:02:00'),"
 						+ " ((select user_id from isep_awt.isep_awt_user where nickname='@sma'),'@dpierre bienvenue !', '2014-09-04 08:35:14');";
 				stmt2.executeUpdate(reqTweet);
+				
+				log.trace("fake data inserted");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
@@ -148,7 +159,7 @@ public class DbHelper {
 
 	public long getUserIdFromNickname(String nickname) {
 		connectionToDb();
-
+		log.debug("nickname = "+nickname);
 		try {
 			// execute query to retrieve id
 			req = "SELECT user_id FROM isep_awt.isep_awt_user WHERE nickname = '"
@@ -164,6 +175,7 @@ public class DbHelper {
 
 	public List<Tweet> getTweets(long userid) {
 		connectionToDb();
+		log.debug("user ID = "+userid);
 		// create the list of tweets to return
 		List<Tweet> listOfTweets = new ArrayList<Tweet>();
 		try {
@@ -180,6 +192,7 @@ public class DbHelper {
 				twt.setTweetDate(rset.getString("tweet_date"));
 				listOfTweets.add(twt);
 			}
+			log.trace(listOfTweets.size() + " tweets retrieved");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

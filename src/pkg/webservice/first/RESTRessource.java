@@ -18,14 +18,10 @@ public class RESTRessource {
 
 	DbHelper dbhelp = new DbHelper();
 
-	// static Logger log = Logger.getLogger(RESTRessource.class);
-
-
 	@GET
 	@Path("updateData")
-	public String updateData() {
+	public void updateData() {
 		dbhelp.updateData();
-		return "ok";
 	}
 
 	@GET
