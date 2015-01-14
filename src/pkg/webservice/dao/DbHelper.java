@@ -48,11 +48,11 @@ public class DbHelper {
 					DBPASSWORD);
 			stmt = (Statement) conn.createStatement();
 			stmt2 = (Statement) conn.createStatement();
+			log.info("[SUCCESS] connected to DB !");
 		} catch (SQLException e) {
 			log.error("unable to connect to DB. Please check your port in DBURL and if WAMP is running.");
 			e.printStackTrace();
 		}
-		log.info("[SUCCESS] connected to DB !");
 	}
 
 	public List<User> getUsers() {
